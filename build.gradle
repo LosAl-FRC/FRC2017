@@ -9,6 +9,10 @@ frc {
     robotClass = "org.usfirst.frc.team6220.Robot"
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile wpilib()
     compile talonSrx()
