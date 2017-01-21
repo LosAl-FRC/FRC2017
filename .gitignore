@@ -1,0 +1,12 @@
+#Stuff
+.gradle/
+.idea/
+FRC2017.iml
+build/
+src/test/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Package Files #
+*.jar
