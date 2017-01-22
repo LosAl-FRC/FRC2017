@@ -2,82 +2,53 @@ package org.usfirst.frc.team6220;
 
 import edu.wpi.first.wpilibj.*;
 
+
 import java.text.DecimalFormat;
 
 /**
  * Created by Carter on 1/20/2017.
  */
-public class Robot extends SampleRobot{
+public class Robot extends SampleRobot {
     //roboRIO-6220-FRC.local
-    private RobotDrive drive; //pins 0,1,2,3
+    private DriveHandler driveHandler;
     private Joystick joystick; //port bottom right on Carter's laptop
-    //private Servo steering; //pin 4
-    private Encoder encoder;
     private VictorSP snowblow;
 
     //Called when the robot is initialized
     public void robotInit() {
         System.out.println("Robot has started");
-        this.drive = new RobotDrive(0, 1, 2, 3);
+        driveHandler = new DriveHandler(new RobotDrive(1, 2, 3, 4));
         this.joystick = new Joystick(0);
-        //this.steering = new Servo(4);
-        this.encoder = new Encoder(0, 1);
         this.snowblow = new VictorSP(5);
     }
 
-    boolean flip = false;
     DecimalFormat round = new DecimalFormat("#.###");
-    int encoderCount = 0, upperLimit = 20, lowerLimit = -20;
 
     public void operatorControl() {
         int i = 0;
         while (isOperatorControl() && isEnabled()) {
-            encoderCount = encoder.get();
-            if(encoderCount >= upperLimit && joystick.getRawAxis(0) > 0){
-                snowblow.set(0);
-            }else if(joystick.getRawAxis(0) > 0){
-                snowblow.set(.3);
-            }else if(encoderCount <= lowerLimit && joystick.getRawAxis(0) < 0){
-                snowblow.set(0);
-            }else if(joystick.getRawAxis(0) < 0){
-                snowblow.set(-0.3);
-            }
+            double rotation = joystick.getRawAxis(3) - joystick.getRawAxis(2),
+                    movementX = joystick.getRawAxis(0),
+                    movementY = joystick.getRawAxis(1);
+            drive.mecanumDrive_Cartesian(movementX, movementY, rotation, 0);
 
-            if(joystick.getRawButton(1)){
-                if(encoderCount < -1){
-                    snowblow.set(.3);
-                }else if(encoderCount > 1){
-                    snowblow.set(-.3);
-                }else{
-                    snowblow.set(0);
-                }
-            }
-
-            if(joystickInRange(-0.05, 0.05) && !joystick.getRawButton(1)){
-                snowblow.set(0);
-            }
-
-            double movement = joystick.getRawAxis(3) - joystick.getRawAxis(2);
-            drive.drive(movement * (flip ? -1 : 1), 0);
-
-            if(i % 50 == 0){
+            if (i % 50 == 0) {
                 i = 0;
                 System.out.println(
                         "Motor Out: " + round.format(snowblow.get())
-                                + " | Joystick: " + String.valueOf(joystick.getRawAxis(0))
-                                + " | Encoder Count: " + encoderCount);
-                //System.out.println("Raw Angle: " + steering.get() + " Raw Angle: " + steering.getAngle() + " Speed: " + steering.getSpeed());
+                                + " | Joystick: " + String.valueOf(joystick.getRawAxis(0)));
             }
             i++;
             Timer.delay(0.01);
         }
     }
 
-    public boolean joystickInRange(double lowBound, double upBound){
+    public boolean joystickInRange(double lowBound, double upBound) {
         return joystick.getRawAxis(0) > lowBound && joystick.getRawAxis(0) < upBound;
     }
 
-    /*public void operatorControl() {
+    /*
+    public void operatorControl() {
         int i = 0;
         while (isOperatorControl() && isEnabled()) {
             double movement = joystick.getRawAxis(3) - joystick.getRawAxis(2);
@@ -109,7 +80,6 @@ public class Robot extends SampleRobot{
             Timer.delay(0.01);
         }
     }*/
-
 
 
 }
