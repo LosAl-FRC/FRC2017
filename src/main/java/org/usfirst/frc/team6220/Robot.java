@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import org.usfirst.frc.team6220.control.MecanumDrive;
 import org.usfirst.frc.team6220.control.ShooterHandler;
 import org.usfirst.frc.team6220.control.TankDrive;
+import org.usfirst.frc.team6220.util.IncrementedRunnable;
 
 
 import java.text.DecimalFormat;
@@ -20,13 +21,14 @@ import java.text.DecimalFormat;
 public class Robot extends SampleRobot {
     //roboRIO-6220-FRC.local
     private MecanumDrive driveHandler;
+    private IncrementedRunnable printer;
     private ShooterHandler shooterHandler;
     private Joystick joystick;
     public static final DecimalFormat round = new DecimalFormat("#.000");
 
-
     public void robotInit() {
         System.out.println("Robot has started");
+        this.printer = new IncrementedRunnable(25, () -> System.out.println("Unimplemented"));
         this.driveHandler = new MecanumDrive(new RobotDrive(
                 new CANTalon(/*frontLeft*/ 1), new CANTalon(/*backLeft*/ 2),
                 new CANTalon(/*frontRight*/ 3), new CANTalon(/*backRight*/ 4)
@@ -38,30 +40,24 @@ public class Robot extends SampleRobot {
     }
 
     public void test(){
-        int i = 0;
         while (isTest() && isEnabled()) {
             shooterHandler.update(joystick);
             LiveWindow.run();
-            if (i % 2 == 0) {
-                i = 0;
-            }
-            i++;
             Timer.delay(0.1);
         }
     }
 
     public void operatorControl() {
-        int i = 0;
+        printer.setRunnable(() -> System.out.println("Shooter: " + shooterHandler.getRPM()));
+        printer.setBound(25);
+        printer.enable();
         while (isOperatorControl() && isEnabled()) {
             driveHandler.update(joystick);
             shooterHandler.update(joystick);
-            if (i % 25 == 0) {
-                i = 0;
-                System.out.println("Shooter: " + shooterHandler.getRPM());
-            }
-            i++;
+            printer.tick();
             Timer.delay(0.01);
         }
+        printer.disable();
     }
 
 }
