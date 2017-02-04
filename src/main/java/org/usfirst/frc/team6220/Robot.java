@@ -39,6 +39,8 @@ public class Robot extends SampleRobot {
                 new CANTalon(/*frontRight*/ 3), new CANTalon(/*backRight*/ 4)
         ));
         shooterHandler = new ShooterHandler(0, new Encoder(0, 1), 2000);
+        driveHandler.initialize(this);
+        shooterHandler.initialize(this);
         LiveWindow.addActuator("Shooter", "PID", shooterHandler.getPID());
         LiveWindow.addSensor("Shooter", "Encoder", shooterHandler.getEncoder());
     }
