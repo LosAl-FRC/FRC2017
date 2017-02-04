@@ -1,6 +1,15 @@
 package org.usfirst.frc.team6220;
 
+import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.hal.EncoderJNI;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.tables.ITable;
+import org.usfirst.frc.team6220.control.MecanumDrive;
+import org.usfirst.frc.team6220.control.ShooterHandler;
+import org.usfirst.frc.team6220.control.TankDrive;
 
 
 import java.text.DecimalFormat;
@@ -10,77 +19,50 @@ import java.text.DecimalFormat;
  */
 public class Robot extends SampleRobot {
     //roboRIO-6220-FRC.local
-    private DriveHandler driveHandler;
-    private Joystick joystick; //port bottom right on Carter's laptop
-    private VictorSP snowblow;
+    private MecanumDrive driveHandler;
+    private ShooterHandler shooterHandler;
+    private Joystick joystick;
+    public static final DecimalFormat round = new DecimalFormat("#.000");
 
-    //Called when the robot is initialized
+
     public void robotInit() {
         System.out.println("Robot has started");
-        driveHandler = new DriveHandler(new RobotDrive(1, 2, 3, 4));
+        this.driveHandler = new MecanumDrive(new RobotDrive(
+                new CANTalon(/*frontLeft*/ 1), new CANTalon(/*backLeft*/ 2),
+                new CANTalon(/*frontRight*/ 3), new CANTalon(/*backRight*/ 4)
+        ));
+        this.shooterHandler = new ShooterHandler(0, new Encoder(0, 1), 2000);
         this.joystick = new Joystick(0);
-        this.snowblow = new VictorSP(5);
+        LiveWindow.addActuator("Shooter", "PID", shooterHandler.getPID());
+        LiveWindow.addSensor("Shooter", "Encoder", shooterHandler.getEncoder());
     }
 
-    DecimalFormat round = new DecimalFormat("#.###");
+    public void test(){
+        int i = 0;
+        while (isTest() && isEnabled()) {
+            shooterHandler.update(joystick);
+            LiveWindow.run();
+            if (i % 2 == 0) {
+                i = 0;
+            }
+            i++;
+            Timer.delay(0.1);
+        }
+    }
 
     public void operatorControl() {
         int i = 0;
         while (isOperatorControl() && isEnabled()) {
-            double rotation = joystick.getRawAxis(3) - joystick.getRawAxis(2),
-                    movementX = joystick.getRawAxis(0),
-                    movementY = joystick.getRawAxis(1);
-            drive.mecanumDrive_Cartesian(movementX, movementY, rotation, 0);
-
-            if (i % 50 == 0) {
+            driveHandler.update(joystick);
+            shooterHandler.update(joystick);
+            if (i % 25 == 0) {
                 i = 0;
-                System.out.println(
-                        "Motor Out: " + round.format(snowblow.get())
-                                + " | Joystick: " + String.valueOf(joystick.getRawAxis(0)));
+                System.out.println("Shooter: " + shooterHandler.getRPM());
             }
             i++;
             Timer.delay(0.01);
         }
     }
-
-    public boolean joystickInRange(double lowBound, double upBound) {
-        return joystick.getRawAxis(0) > lowBound && joystick.getRawAxis(0) < upBound;
-    }
-
-    /*
-    public void operatorControl() {
-        int i = 0;
-        while (isOperatorControl() && isEnabled()) {
-            double movement = joystick.getRawAxis(3) - joystick.getRawAxis(2);
-            drive.drive(movement * (flip ? -1 : 1), 0);
-            double angle = (joystick.getRawAxis(0) + 1) / 2;
-            if(angle > .49 && angle < .505){
-                angle = .5;
-            }
-            boolean reverseFlip = flip;
-            if(movement < 0){
-                reverseFlip = !flip;
-            }
-            double wheelPosition = 90;
-            wheelPosition = 90 + (((angle - .5) * (reverseFlip ? 1 : -1)) * 90);
-            //wheelPosition = 180 * angle;
-            //angle = Math.pow(angle, joystick.getRawAxis(3) - joystick.getRawAxis(2));
-            steering.setAngle(wheelPosition);
-            //drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-            //drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-            if(i % 50 == 0){
-                i = 0;
-                System.out.println("Movement: " + round.format(movement)
-                        + " | Wheel Position: " + round.format(wheelPosition)
-                        + " | Angle: " + round.format(angle)
-                        + " | Actual Position: " + round.format(steering.getPosition()));
-                //System.out.println("Raw Angle: " + steering.get() + " Raw Angle: " + steering.getAngle() + " Speed: " + steering.getSpeed());
-            }
-            i++;
-            Timer.delay(0.01);
-        }
-    }*/
-
 
 }
 
