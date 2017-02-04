@@ -63,6 +63,7 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
 
     @Override
     public void update(Joystick joystick) {
+        incrementedRunnable.tick();
         if (doToggle) {
             toggleState();
             if (getState() && !rpmPID.isEnabled()) {
