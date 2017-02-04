@@ -3,17 +3,28 @@ package org.usfirst.frc.team6220.control;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import org.usfirst.frc.team6220.Robot;
 import org.usfirst.frc.team6220.subclasses.JoystickControl;
 
 /**
  * Created by student on 1/21/2017.
  */
-public class MecanumDrive implements JoystickControl {
+public class MecanumDrive extends JoystickControl {
 
     private final RobotDrive drive;
 
     public MecanumDrive(RobotDrive drive) {
         this.drive = drive;
+    }
+
+    @Override
+    public void initialize(Robot robot) {
+
+    }
+
+    @Override
+    public void terminate(Robot robot) {
+
     }
 
     @Override

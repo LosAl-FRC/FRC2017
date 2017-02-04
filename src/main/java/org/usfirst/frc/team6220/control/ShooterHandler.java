@@ -7,42 +7,30 @@ import org.usfirst.frc.team6220.Robot;
 import org.usfirst.frc.team6220.subclasses.JoystickControl;
 import org.usfirst.frc.team6220.subclasses.RpmPidSource;
 import org.usfirst.frc.team6220.subclasses.Toggleable;
+import org.usfirst.frc.team6220.util.IncrementedRunnable;
 
 /**
  * Created by student on 1/21/2017.
  */
-public class ShooterHandler implements JoystickControl, Toggleable {
+public class ShooterHandler extends JoystickControl implements Toggleable {
     private final PIDController rpmPID;
-    private boolean state = false;
-    private final VictorSP flywheel;
     private final RpmPidSource rpmPidSource;
-    int updateTimer = 0;
-    boolean useTimer = false;
+    private final VictorSP flywheel;
     private Encoder encoder;
+    private IncrementedRunnable incrementedRunnable;
     private DescriptiveStatistics statistics;
-    private long lines = 0;
 
-    public PIDController getPID(){
-        return rpmPID;
-    }
-
-    public Encoder getEncoder(){
-        return encoder;
-    }
+    private boolean doToggle = false, state = false;
 
     public ShooterHandler(int motorChannel, Encoder encoder, int desiredRPM) {
-        flywheel = new VictorSP(motorChannel);
         statistics = new DescriptiveStatistics();
         statistics.setWindowSize(30);
+        flywheel = new VictorSP(motorChannel);
         this.encoder = encoder;
         this.rpmPID = new PIDController(
                 0.00001, 0, 0,
                 rpmPidSource = new RpmPidSource(this.encoder, 12),
                 output -> {
-                    if(lines >= 25){
-                        lines = 0;
-                    }
-                    lines++;
                     statistics.addValue((int) rpmPidSource.pidGet());
                     flywheel.set((output < 0) ? 0 : output);
                     System.out.println("RPM: " + ((int) rpmPidSource.pidGet())
@@ -53,6 +41,45 @@ public class ShooterHandler implements JoystickControl, Toggleable {
         );
         rpmPID.setOutputRange(0, 0.75);
         rpmPID.setSetpoint(desiredRPM);
+    }
+
+    @Override
+    public void initialize(Robot robot) {
+        this.incrementedRunnable = new IncrementedRunnable(20, new Runnable() {
+            private boolean lastButtonPressed = false;
+            @Override
+            public void run() {
+                boolean newButtonPressed = robot.getJoystick().getRawButton(JoystickControl.SHOOTER_TOGGLE);
+                if(!lastButtonPressed && newButtonPressed){ //false true
+                    lastButtonPressed = true;
+                    doToggle = true;
+                }else if(lastButtonPressed && !newButtonPressed){ //true false
+                    lastButtonPressed = false;
+                }
+            }
+        });
+        incrementedRunnable.enable();
+    }
+
+    @Override
+    public void update(Joystick joystick) {
+        if (doToggle) {
+            toggleState();
+            if (getState() && !rpmPID.isEnabled()) {
+                rpmPID.enable();
+                System.out.println("Shooter Enabled");
+            } else if (!getState() && rpmPID.isEnabled()) {
+                rpmPID.disable();
+                System.out.println("Shooter Disabled");
+            }
+        }
+    }
+
+    @Override
+    public void terminate(Robot robot) {
+        incrementedRunnable.disable();
+        rpmPID.disable();
+        doToggle = false;
     }
 
     public String getRPM(){
@@ -68,36 +95,12 @@ public class ShooterHandler implements JoystickControl, Toggleable {
         rpmPID.disable();
         rpmPID.setSetpoint(rpm);
         rpmPID.enable();
-
-    }
-
-    @Override
-    public void update(Joystick joystick) {
-        if (useTimer) {
-            updateTimer++;
-            if (updateTimer % 50 != 0) {
-                return;
-            }
-            useTimer = false;
-        }
-
-        boolean buttonPressed = joystick.getRawButton(JoystickControl.SHOOTER_TOGGLE);
-        if (buttonPressed) {
-            useTimer = true;
-            toggleState();
-            if (getState() && !rpmPID.isEnabled()) {
-                rpmPID.enable();
-                System.out.println("Enabled");
-            } else if (!getState() && rpmPID.isEnabled()) {
-                rpmPID.disable();
-                System.out.println("Disabled");
-            }
-        }
     }
 
     @Override
     public void toggleState() {
         Toggleable.super.toggleState();
+        doToggle = false;
     }
 
     @Override
@@ -109,4 +112,13 @@ public class ShooterHandler implements JoystickControl, Toggleable {
     public void setState(boolean state) {
         this.state = state;
     }
+
+    public PIDController getPID(){
+        return rpmPID;
+    }
+
+    public Encoder getEncoder(){
+        return encoder;
+    }
+
 }
