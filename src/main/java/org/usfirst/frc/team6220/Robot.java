@@ -29,9 +29,7 @@ public class Robot extends SampleRobot {
                 new CANTalon(/*frontLeft*/ 1), new CANTalon(/*backLeft*/ 2),
                 new CANTalon(/*frontRight*/ 3), new CANTalon(/*backRight*/ 4)
         ));
-        shooterHandler = new ShooterHandler(0, new Encoder(0, 1), 2000);
-        driveHandler.initialize(this);
-        shooterHandler.initialize(this);
+        shooterHandler = new ShooterHandler(0, new Encoder(0, 1), 300);
         LiveWindow.addActuator("Shooter", "PID", shooterHandler.getPID());
         LiveWindow.addSensor("Shooter", "Encoder", shooterHandler.getEncoder());
     }
@@ -49,6 +47,7 @@ public class Robot extends SampleRobot {
         printer.setRunnable(() -> System.out.println("Shooter: " + shooterHandler.getRPM()));
         printer.setBound(25);
         //printer.enable();
+        shooterHandler.initialize(this);
         while (isOperatorControl() && isEnabled()) {
             driveHandler.update(joystick);
             shooterHandler.update(joystick);
@@ -58,13 +57,12 @@ public class Robot extends SampleRobot {
         printer.disable();
     }
 
-    /*@Override
+    @Override
     public void disabled(){
         System.out.println("Robot disabled, terminating handlers");
         if(shooterHandler != null) shooterHandler.terminate(this);
-        if(driveHandler != null) driveHandler.terminate(this);
         if(printer != null) printer.disable();
-    }*/
+    }
 
     public Joystick getJoystick(){
         return joystick;

@@ -9,6 +9,8 @@ import org.usfirst.frc.team6220.subclasses.RpmPidSource;
 import org.usfirst.frc.team6220.subclasses.Toggleable;
 import org.usfirst.frc.team6220.util.IncrementedRunnable;
 
+import static edu.wpi.first.wpilibj.RobotState.isEnabled;
+
 /**
  * Created by student on 1/21/2017.
  */
@@ -32,8 +34,8 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
                 rpmPidSource = new RpmPidSource(this.encoder, 12),
                 output -> {
                     statistics.addValue((int) rpmPidSource.pidGet());
-                    flywheel.set((output < 0) ? 0 : output);
-                    if(state){
+                    //flywheel.set((output < 0) ? 0 : output);
+                    if(state && isEnabled()){
                         System.out.println("RPM: " + ((int) rpmPidSource.pidGet())
                                 + " OUT: " + Robot.round.format(output)
                                 + " SPD: " + Robot.round.format(flywheel.getSpeed())
@@ -41,7 +43,7 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
                     }
                 }
         );
-        rpmPID.setOutputRange(0, 0.75);
+        rpmPID.setOutputRange(0, .25);
         rpmPID.setSetpoint(desiredRPM);
     }
 
@@ -69,10 +71,12 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
         if (doToggle) {
             toggleState();
             if (getState() && !rpmPID.isEnabled()) {
+                flywheel.set(.25);
                 rpmPID.enable();
                 System.out.println("Shooter Enabled");
             } else if (!getState() && rpmPID.isEnabled()) {
                 rpmPID.disable();
+                flywheel.set(0);
                 System.out.println("Shooter Disabled");
             }
         }
@@ -80,9 +84,10 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
 
     @Override
     public void terminate(Robot robot) {
-        incrementedRunnable.disable();
-        rpmPID.disable();
+        if(incrementedRunnable != null) incrementedRunnable.disable();
+        if(rpmPID != null) rpmPID.disable();
         doToggle = false;
+        state = false;
     }
 
     public String getRPM(){
