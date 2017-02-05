@@ -1,6 +1,5 @@
 package org.usfirst.frc.team6220.control;
 
-import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import org.usfirst.frc.team6220.Robot;

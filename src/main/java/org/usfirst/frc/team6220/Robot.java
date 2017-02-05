@@ -2,21 +2,12 @@ package org.usfirst.frc.team6220;
 
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.hal.EncoderJNI;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.tables.ITable;
 import org.usfirst.frc.team6220.control.MecanumDrive;
 import org.usfirst.frc.team6220.control.ShooterHandler;
-import org.usfirst.frc.team6220.control.TankDrive;
-import org.usfirst.frc.team6220.subclasses.JoystickControl;
 import org.usfirst.frc.team6220.util.IncrementedRunnable;
 
-
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Carter on 1/20/2017.
@@ -57,7 +48,7 @@ public class Robot extends SampleRobot {
     public void operatorControl() {
         printer.setRunnable(() -> System.out.println("Shooter: " + shooterHandler.getRPM()));
         printer.setBound(25);
-        printer.enable();
+        //printer.enable();
         while (isOperatorControl() && isEnabled()) {
             driveHandler.update(joystick);
             shooterHandler.update(joystick);
@@ -67,13 +58,13 @@ public class Robot extends SampleRobot {
         printer.disable();
     }
 
-    @Override
+    /*@Override
     public void disabled(){
         System.out.println("Robot disabled, terminating handlers");
         if(shooterHandler != null) shooterHandler.terminate(this);
         if(driveHandler != null) driveHandler.terminate(this);
         if(printer != null) printer.disable();
-    }
+    }*/
 
     public Joystick getJoystick(){
         return joystick;

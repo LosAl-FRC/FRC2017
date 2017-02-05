@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
-
 /*
  * Simplest program to drive a robot with mecanum drive using a single Logitech
  * Extreme 3D Pro joystick and 4 drive motors connected as follows:

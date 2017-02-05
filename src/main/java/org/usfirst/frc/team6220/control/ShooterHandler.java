@@ -33,10 +33,12 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
                 output -> {
                     statistics.addValue((int) rpmPidSource.pidGet());
                     flywheel.set((output < 0) ? 0 : output);
-                    System.out.println("RPM: " + ((int) rpmPidSource.pidGet())
-                            + " OUT: " + Robot.round.format(output)
-                            + " SPD: " + Robot.round.format(flywheel.getSpeed())
-                            + " AVG: " + (int) statistics.getMean());
+                    if(state){
+                        System.out.println("RPM: " + ((int) rpmPidSource.pidGet())
+                                + " OUT: " + Robot.round.format(output)
+                                + " SPD: " + Robot.round.format(flywheel.getSpeed())
+                                + " AVG: " + (int) statistics.getMean());
+                    }
                 }
         );
         rpmPID.setOutputRange(0, 0.75);
@@ -58,12 +60,12 @@ public class ShooterHandler extends JoystickControl implements Toggleable {
                 }
             }
         });
-        incrementedRunnable.enable();
+        this.incrementedRunnable.enable();
     }
 
     @Override
     public void update(Joystick joystick) {
-        incrementedRunnable.tick();
+        this.incrementedRunnable.tick();
         if (doToggle) {
             toggleState();
             if (getState() && !rpmPID.isEnabled()) {
