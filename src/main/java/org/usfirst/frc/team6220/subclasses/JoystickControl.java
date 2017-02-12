@@ -1,6 +1,7 @@
 package org.usfirst.frc.team6220.subclasses;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import org.usfirst.frc.team6220.Robot;
 
 /**
@@ -18,8 +19,11 @@ public abstract class JoystickControl {
             MOVE_LONG = 1, //Longitudinal (forward and backward)
 
     //These are buttons which give off booleans (0 or 1)
-            AUTO_CONTINUAL = 0,
-            SHOOTER_TOGGLE = 1;
+            AUTO_CONTINUAL = 1,
+            SHOOTER_TOGGLE = 2,
+    //Bumpers (buttons too)
+            MOVE_ANGLE_LEFT = 5,
+            MOVE_ANGLE_RIGHT = 6;
 
     public static boolean joystickInRange(double lowBound, double upBound, Joystick joystick) {
         return joystick.getRawAxis(0) > lowBound && joystick.getRawAxis(0) < upBound;
